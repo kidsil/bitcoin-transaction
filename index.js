@@ -179,7 +179,7 @@ function sendTransaction (options) {
 		getFees(options.feesProvider, options.fee),
 		options.utxoProvider(from)
 	]).then(function (res) {
-		var feePerByte = res[0];
+		var fee = res[0];
 		var utxos = res[1];
 
 		//Setup inputs from utxos
@@ -200,9 +200,8 @@ function sendTransaction (options) {
 		if (availableSat < amtSatoshi) throw "You do not have enough in your wallet to send that much.";
 
 		var change = availableSat - amtSatoshi;
-		var fee = getTransactionSize(ninputs, change > 0 ? 2 : 1)*feePerByte;
 		if (fee > amtSatoshi) throw "BitCoin amount must be larger than the fee. (Ideally it should be MUCH larger)";
-		tx.addOutput(to, amtSatoshi - fee);
+		tx.addOutput(to, amtSatoshi + fee);
 		if (change > 0) tx.addOutput(from, change);
 		var keyPair = bitcoin.ECPair.fromWIF(options.privKeyWIF, bitcoinNetwork);
 		for (var i = 0; i < ninputs; i++) {
